@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LLANTERAMA POZA RICA</title>
+    <title>POZA RICA ANALYTICS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -11,16 +11,13 @@
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Inter:wght@400;700;900&display=swap');
-        
         body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .yellow-glow { text-shadow: 0 0 15px #facc15 !important; }
         
         @media (max-width: 480px) {
-            .logo-bienvenida { font-size: 2.2rem !important; } 
+            .logo-bienvenida { font-size: 2.8rem !important; } 
             .text-6xl { font-size: 2.2rem !important; } 
-            .text-4xl { font-size: 1.8rem !important; } 
             .number-big { font-size: 2.2rem !important; } 
-            .kpi-title-text { font-size: 1.2rem !important; }
         }
 
         .mes-actual-resaltado { 
@@ -30,11 +27,9 @@
         }
 
         .zona-badge {
-            background: #001529 !important;
-            color: #facc15 !important;
-            width: 32px; height: 32px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; font-weight: 900; font-size: 0.8rem; flex-shrink: 0;
+            background: #001529 !important; color: #facc15 !important;
+            width: 32px; height: 32px; display: flex; align-items: center; 
+            justify-content: center; border-radius: 50%; font-weight: 900;
         }
 
         .z-color-0 { border-left: 10px solid #ef4444 !important; }
@@ -44,32 +39,21 @@
         .z-color-4 { border-left: 10px solid #8b5cf6 !important; }
         .z-color-5 { border-left: 10px solid #06b6d4 !important; }
 
-        .pdf-card { 
-            page-break-inside: avoid; border-radius: 20px; 
-            background: white; border: 1px solid #e2e8f0; 
-            padding: 15px; margin-bottom: 15px; 
-        }
-
-        .confidencial-bar {
-            background: #ef4444 !important; color: white !important;
-            font-size: 8px !important; font-weight: 900 !important;
-            text-align: center; padding: 4px; letter-spacing: 1px;
-            text-transform: uppercase;
-        }
+        .pdf-card { page-break-inside: avoid; border-radius: 20px; background: white; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 15px; }
+        .confidencial-bar { background: #ef4444 !important; color: white !important; font-size: 8px !important; font-weight: 900 !important; text-align: center; padding: 4px; text-transform: uppercase; }
     </style>
 </head>
 <body class="bg-slate-50">
 
     <div id="loader" class="fixed inset-0 bg-[#001529] z-[100] flex flex-col items-center justify-center text-white">
         <div class="w-10 h-10 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="text-[10px] font-black tracking-widest uppercase">Cargando Inteligencia Poza Rica...</p>
+        <p class="text-[10px] font-black tracking-widest uppercase">Conectando con Poza Rica...</p>
     </div>
 
     <div id="view-cover" class="fixed inset-0 bg-[#001529] z-50 flex flex-col items-center justify-center text-center p-6">
-        <h1 class="logo-bienvenida text-5xl font-black text-white italic mb-2 yellow-glow font-['Orbitron'] leading-tight uppercase">POZA RICA</h1>
+        <h1 class="logo-bienvenida text-5xl font-black text-white italic mb-2 yellow-glow font-['Orbitron'] leading-tight">POZA RICA</h1>
         <p class="text-yellow-400 font-bold text-[9px] tracking-[0.3em] mb-12 uppercase">Unidad de Inteligencia Comercial</p>
         <button onclick="enterApp()" class="bg-yellow-400 text-blue-900 font-black px-10 py-4 rounded-xl uppercase text-sm shadow-xl active:scale-95 transition-all">ACCEDER</button>
-        <p class="mt-20 text-red-500 font-black text-[8px] tracking-widest uppercase opacity-50">Llanterama Poza Rica - Privado</p>
     </div>
 
     <header id="main-header" class="hidden bg-[#001529] text-white p-4 sticky top-0 z-40 border-b-2 border-yellow-400">
@@ -84,19 +68,29 @@
     </main>
 
     <script>
+        // URL Corregida para forzar descarga limpia de CSV
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQUv_5jyAb0_Hdvs5nBLsDbr-9FME__6Y7HS1Fz7QAU8Kdm1v13rQfLWbDgoLxjRiiX82F4K2hFsv6O/pub?gid=97082076&single=true&output=csv';
         let db = [];
         const mesesRef = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
 
         async function start() {
             try {
-                const response = await fetch(CSV_URL + '&cb=' + Date.now());
+                const response = await fetch(CSV_URL);
                 const text = await response.text();
-                Papa.parse(text, { header: true, skipEmptyLines: true, complete: (res) => { 
-                    db = res.data.filter(r => r.MES); 
-                    document.getElementById('loader').classList.add('hidden'); 
-                }});
-            } catch (e) { alert("Error de Conexión con Poza Rica"); }
+                Papa.parse(text, { 
+                    header: true, 
+                    skipEmptyLines: true, 
+                    complete: (res) => { 
+                        db = res.data.filter(r => r.MES); 
+                        if(db.length === 0) throw new Error("Datos vacíos");
+                        document.getElementById('loader').classList.add('hidden'); 
+                    },
+                    error: (err) => { alert("Error al leer el archivo"); }
+                });
+            } catch (e) { 
+                console.error(e);
+                alert("Error de Conexión. Verifica que el archivo de Google Sheets esté publicado como CSV."); 
+            }
         }
 
         function enterApp() {
@@ -164,6 +158,7 @@
             const [m, a] = period.split(' ');
             const d = db.find(r => r.VENDEDOR === v && r.MES === m && r.AÑO === a);
             
+            // Mapeo exacto de las columnas de Poza Rica
             const cats = [
                 {n:'Acumuladores (Total)', o:'OBJ ACUM', r:'REAL ACUM', color: '#0f172a', main: true},
                 {n:'Premium', o:'OBJ PREMIUM', r:'REAL PREMIUM', color: '#1e3a8a'},
@@ -172,8 +167,8 @@
                 {n:'Llantas Auto', o:'OBJ AUTO', r:'REAL AUTO', color: '#f59e0b'},
                 {n:'Llantas Camioneta', o:'OBJ CAMIONETA', r:'REAL CAMIONETA', color: '#d97706'},
                 {n:'Llantas Camión', o:'OBJ CAMION', r:'REAL CAMION', color: '#92400e'},
-                {n:'Lubricantes', o:'OBJ LUB', r:'REAL LUB', color: '#f97316'},
                 {n:'Motobaterías', o:'OBJ MOTO', r:'REAL MOTO', color: '#ef4444'},
+                {n:'Lubricantes', o:'OBJ LUB', r:'REAL LUB', color: '#f97316'},
                 {n:'Filtros', o:'OBJ FILTRO', r:'REAL FILTRO', color: '#16a34a'},
                 {n:'Alcalinas', o:'OBJ ALCALINA', r:'REAL ALCALINA', color: '#9333ea'}
             ];
@@ -181,7 +176,7 @@
             let html = `
             <div class="flex justify-between items-center mb-6 no-print">
                 <button onclick="renderSellers('${d.ZONA}', '${period}')" class="text-[10px] font-black text-slate-500 uppercase">← SALIR</button>
-                <button onclick="downloadPDF('${d.VENDEDOR}', '${period}')" class="bg-blue-900 text-yellow-400 px-4 py-2 rounded-lg text-[10px] font-black shadow-lg uppercase">Generar PDF</button>
+                <button onclick="downloadPDF('${d.VENDEDOR}', '${period}')" class="bg-blue-900 text-yellow-400 px-4 py-2 rounded-lg text-[10px] font-black shadow-lg uppercase">PDF</button>
             </div>
             
             <div id="pdf-container">
@@ -190,7 +185,7 @@
                     <p class="text-yellow-400 font-black text-[8px] uppercase tracking-widest mb-2">${period} | ${d.ZONA}</p>
                     <h2 class="text-3xl font-black italic uppercase tracking-tighter leading-tight mb-8">${d.VENDEDOR}</h2>
                     <div class="bg-white/10 p-4 rounded-2xl text-center border border-white/10">
-                        <p class="text-[8px] font-bold text-slate-400 uppercase mb-1">Venta Total (Importe)</p>
+                        <p class="text-[8px] font-bold text-slate-400 uppercase mb-1">Importe de Venta</p>
                         <p class="text-4xl font-black text-white">$${f(n(d['IMPORTE']))}</p>
                     </div>
                 </div>
@@ -208,7 +203,6 @@
                     <div class="flex justify-between items-start mb-4">
                         <div class="max-w-[70%]">
                             <h4 class="kpi-title-text text-lg font-black italic uppercase text-blue-950 leading-none">${c.n}</h4>
-                            ${c.main ? '<span class="bg-blue-950 text-yellow-400 text-[7px] font-black px-1.5 py-0.5 rounded mt-1 inline-block">OBJETIVO CENTRAL</span>' : ''}
                         </div>
                         <div class="bg-blue-950 text-yellow-400 px-3 py-1 rounded-xl font-black text-sm shadow-md">${Math.round(perc)}%</div>
                     </div>
@@ -229,10 +223,7 @@
                     </div>
 
                     <div class="text-center">
-                        ${falta > 0 ? 
-                            `<p class="text-[10px] font-black text-red-500 italic uppercase">Faltan ${falta} pz</p>` : 
-                            `<p class="text-[10px] font-black text-green-600 italic uppercase">¡Logrado!</p>`
-                        }
+                        ${falta > 0 ? `<p class="text-[10px] font-black text-red-500 italic uppercase">Faltan ${falta} pz</p>` : `<p class="text-[10px] font-black text-green-600 italic uppercase">¡Logrado!</p>`}
                     </div>
                 </div>`;
             });
